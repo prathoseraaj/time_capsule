@@ -1,18 +1,41 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, send_file
 import sqlite3
 import uuid
 from datetime import datetime
+from flask_cors import CORS
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='build', static_url_path='')
+CORS(app)
 DB = 'message.db'
 
 def init_db():
     with sqlite3.connect(DB) as conn:
-        conn.execute('''CREATE TABLE IF NOT EXISTS messages (
-            id TEXT PRIMARY KEY,
-            unlock_time TEXT,
-            encrypted TEXT''')
-@app.route('/store',methods=['POST'])
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                id TEXT PRIMARY KEY,
+                unlock_time TEXT,
+                encrypted TEXT
+            )
+        ''')
+        conn.commit()  
+
+
+init_db()
+
+@app.route('/')
+def serve_react():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def serve_react_static(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
+
+# API Routes
+@app.route('/api/store', methods=['POST'])
 def store():
     data = request.get_json()
     message_id = str(uuid.uuid4())
@@ -22,6 +45,7 @@ def store():
     with sqlite3.connect(DB) as conn:
         conn.execute("INSERT INTO messages (id, unlock_time, encrypted) VALUES (?, ?, ?)",
                      (message_id, unlock_time, encrypted))
+        conn.commit()  # Ensure changes are committed
 
     return jsonify({ 'id': message_id })
 
@@ -35,30 +59,37 @@ def view(message_id):
         return "Message not found.", 404
 
     unlock_time, encrypted = row
-    now = datetime.utcnow()
+    now = datetime.now()  
 
     try:
-        unlock_dt = datetime.strptime(unlock_time, '%Y-%m-%dT%H:%M')
-    except Exception:
-        return "Invalid unlock time format.", 400
+        if len(unlock_time) == 16: 
+            unlock_dt = datetime.strptime(unlock_time, '%Y-%m-%dT%H:%M')
+        else:  
+            unlock_dt = datetime.strptime(unlock_time, '%Y-%m-%dT%H:%M:%S')
+    except Exception as e:
+        return f"Invalid unlock time format: {e}", 400
+
+    print("NOW     :", now.isoformat())
+    print("UNLOCK  :", unlock_dt.isoformat())
 
     if now < unlock_dt:
         return "Message not yet unlocked.", 403
-    return f'''
-    <h3>Encrypted Message</h3>
-    <p>Use the key from the URL hash (#key) to decrypt this message client-side.</p>
-    <pre id="ciphertext">{encrypted}</pre>
-    <textarea id="output" rows="10" cols="50"></textarea>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script>
-      const encrypted = document.getElementById('ciphertext').innerText;
-      const key = decodeURIComponent(window.location.hash.substring(1));
-      const decrypted = CryptoJS.AES.decrypt(encrypted, key).toString(CryptoJS.enc.Utf8);
-      document.getElementById('output').value = decrypted || "[Wrong key or corrupt message]";
-    </script>
+    return f'''
+    <!DOCTYPE html>
+    <html>
+    <body>
+        <div id="output"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+        <script>
+          const encrypted = "{encrypted}";
+          const key = decodeURIComponent(window.location.hash.substring(1));
+          const decrypted = CryptoJS.AES.decrypt(encrypted, key).toString(CryptoJS.enc.Utf8);
+          document.getElementById('output').innerText = decrypted || "Could not decrypt message";
+        </script>
+    </body>
+    </html>
     '''
 
 if __name__ == '__main__':
-    init_db()
-    app.run(host='127.0.0.1', port=5000)
+    app.run(host='127.0.0.1', port=5000, debug=False)
