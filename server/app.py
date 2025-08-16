@@ -5,7 +5,7 @@ from datetime import datetime
 from flask_cors import CORS
 import os
 
-app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
+app = Flask(__name__, static_folder='../client/dist', static_url_path='')
 CORS(app)
 DB = 'message.db'
 
@@ -73,7 +73,6 @@ def view(message_id):
     if now < unlock_dt:
         return "Message not yet unlocked.", 403
 
-    # Simpler HTML (from first code)
     return f'''
     <!DOCTYPE html>
     <html>
