@@ -1,1 +1,20 @@
-6eoqy4qvkvb2yv4so5ig62yeqnumyexkyhaheatmrzsrmguh5oratsid.onion
+# onion.txt
+
+# How to get your .onion link for Dead Note - Time Capsule:
+
+1. Configure your Tor hidden service in your torrc file:
+
+   HiddenServiceDir /path/to/hidden_service/
+   HiddenServicePort 80 127.0.0.1:5000
+
+2. Restart Tor (`sudo systemctl restart tor` or restart the Tor service on your OS).
+
+3. After Tor restarts, open the file:
+   /path/to/hidden_service/hostname
+
+4. Copy the .onion address you find there and paste it below.
+   Example:
+   deadnoteexample12345.onion
+
+# Your actual .onion address (replace this example with the real one):
+deadnoteexample12345.onion
