@@ -33,22 +33,25 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-xl font-bold mb-4">DeadNet - Time Capsule</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-md">
+    <div className="h-[100vh] w-full bg-black text-white flex flex-col items-center justify-center p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-3 w-full max-w-md"
+      >
         <textarea
           rows="5"
           placeholder="Enter your secret message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="p-2 bg-black border border-white text-white w-full rounded"
+          className="p-2 bg-black border border-white text-white w-full rounded resize-none"
         />
         <input
           type="datetime-local"
           value={unlockTime}
           onChange={(e) => setUnlockTime(e.target.value)}
-          className="p-2 bg-black border border-white text-white w-full rounded"
+          className="p-2 border border-white bg-black text-white w-full rounded appearance-none focus:outline-none"
         />
+
         <button
           type="submit"
           className="p-2 border border-white text-white rounded hover:bg-white hover:text-black transition"
