@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
-import uuid
+import secrets
 from datetime import datetime
 from flask_cors import CORS
 import os
@@ -22,7 +22,6 @@ def init_db():
 
 init_db()
 
-# Serve React build
 @app.route('/')
 def serve_react():
     return send_from_directory(app.static_folder, 'index.html')
@@ -34,11 +33,10 @@ def serve_react_static(path):
     else:
         return send_from_directory(app.static_folder, 'index.html')
 
-# API: Store message
 @app.route('/api/store', methods=['POST'])
 def store():
     data = request.get_json()
-    message_id = str(uuid.uuid4())
+    message_id = secrets.token_urlsafe(5)  
     unlock_time = data.get('unlockTime')
     encrypted = data.get('encryptedMessage')
 
@@ -49,7 +47,6 @@ def store():
 
     return jsonify({'id': message_id})
 
-# API: View message
 @app.route('/view/<message_id>')
 def view(message_id):
     with sqlite3.connect(DB) as conn:
