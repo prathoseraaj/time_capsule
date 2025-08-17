@@ -18,15 +18,13 @@ function App() {
     const key = CryptoJS.lib.WordArray.random(16).toString();
     const encrypted = CryptoJS.AES.encrypt(message, key).toString();
     const time = unlockTime.length === 16 ? unlockTime + ":00" : unlockTime;
-  
+
     try {
-      // Use relative URL - will work with any domain including .onion
       const res = await axios.post("/api/store", {
         encryptedMessage: encrypted,
-        unlockTime: time, 
+        unlockTime: time,
       });
 
-      // Generate link using current origin (will be your .onion address)
       setLink(`${window.location.origin}/view/${res.data.id}#${key}`);
     } catch (err) {
       console.error("Error:", err);
@@ -35,35 +33,39 @@ function App() {
   };
 
   return (
-    <div style={{ padding: 20, justifyContent: "center", alignItems: "center" }}>
-      <h2>DeadNet - Anonymous Time Capsule</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <textarea
-            rows="5"
-            cols="50"
-            placeholder="Enter your secret message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-        </div>
-        <div>
-          Unlock Date & Time:
-          <br />
-          <input
-            type="datetime-local"
-            value={unlockTime}
-            onChange={(e) => setUnlockTime(e.target.value)}
-          />
-        </div>
-        <button type="submit">Create Capsule</button>
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      <h1 className="text-xl font-bold mb-4">DeadNet - Time Capsule</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-md">
+        <textarea
+          rows="5"
+          placeholder="Enter your secret message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="p-2 bg-black border border-white text-white w-full rounded"
+        />
+        <input
+          type="datetime-local"
+          value={unlockTime}
+          onChange={(e) => setUnlockTime(e.target.value)}
+          className="p-2 bg-black border border-white text-white w-full rounded"
+        />
+        <button
+          type="submit"
+          className="p-2 border border-white text-white rounded hover:bg-white hover:text-black transition"
+        >
+          Create Capsule
+        </button>
       </form>
 
       {link && (
-        <div style={{ marginTop: 20 }}>
-          <b>Save this link to access your message later:</b>
-          <br />
-          <a href={link} target="_blank" rel="noreferrer">
+        <div className="mt-4 text-center">
+          <p className="mb-1">Save this link:</p>
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="break-all underline"
+          >
             {link}
           </a>
         </div>
