@@ -19,7 +19,7 @@ A secure, time-locked message application for the Tor network. Users can encrypt
 
 - This project is designed to run as a hidden service on the Tor network.
 - You must have `tor` installed and configured to expose your Flask server as a `.onion` address.
-- See [`onion.txt`](server/onion.txt) for your server's configured .onion address.
+- See [`onion.txt`](server/onion.txt) for getting server's configured .onion address.
 
 ---
 
