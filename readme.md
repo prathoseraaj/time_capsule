@@ -138,4 +138,4 @@ python app.py
 3. Configure Tor to map your `.onion` address to Flask (`127.0.0.1:5000`)
 4. Access via Tor Browser: `http://<your-onion-address>.onion`
 
----
+---      
